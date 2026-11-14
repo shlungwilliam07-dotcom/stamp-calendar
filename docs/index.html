@@ -244,8 +244,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="config.js?v=1794669948"></script>
-<script src="app.js?v=1794669948"></script>
+<script src="config.js?v=1794670623"></script>
+<script src="app.js?v=1794670623"></script>
 
 <script>
 (function(){
@@ -640,6 +640,24 @@ const A={
   close(){ if(!$("#sheet").dataset.locked) closeSheet() },
   role(el){S.me=el.dataset.v;ls.set("me",S.me);if(window.appSetRole)window.appSetRole(S.me);closeSheet();render()},
   signOut(){if(window.appSignOut)window.appSignOut()},
+  importOpen(){sheet(`<div class="row between"><p class="h2">匯入紀錄</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
+    <label class="field"><span>貼上匯入用的文字</span><textarea id="import-text" rows="8" placeholder='{"stamps":[…],"list":{…}}'></textarea></label>
+    <p class="hint">已經有的項目會自動略過，重複匯入不會變成兩份。</p>
+    <button class="btn" data-act="importRun">匯入</button>`)},
+  importRun(){
+    let d; try{d=JSON.parse($("#import-text").value)}catch(e){toast("格式不對，請整段重新複製貼上");return}
+    if(!clLoaded.long||!clLoaded.zhen){toast("資料還在讀取，請稍後再試");return}
+    const P=["long","zhen"]; let ns=0, ni=0;
+    (Array.isArray(d.stamps)?d.stamps:[]).forEach(x=>{const ts=new Date(x.time).getTime(), reason=String(x.reason||"").slice(0,60);
+      if(!P.includes(x.to)||!["good","bad"].includes(x.kind)||!reason||isNaN(ts)) return;
+      if(S.stamps.some(o=>o.to===x.to&&o.kind===x.kind&&o.reason===reason&&o.ts===ts)) return;
+      Store.add("stamps",{to:x.to,by:x.to==="long"?"zhen":"long",kind:x.kind,reason,ts}); ns++});
+    P.forEach(w=>{const rows=d.list&&Array.isArray(d.list[w])?d.list[w]:[]; let ch=false;
+      rows.forEach(x=>{const text=String(x.text||"").slice(0,300).trim(), indent=x.indent?1:0; if(!text) return;
+        if(CL[w].some(o=>o.text===text&&o.indent===indent)) return;
+        CL[w].push({id:uid(),text,done:false,indent,both:false}); ch=true; ni++});
+      if(ch){clNorm(w);clTouch(w)}});
+    closeSheet(); render(); toast("已匯入 "+ns+" 個印章、"+ni+" 個列表項目")},
   book(el){S.book=el.dataset.v;S.sel=null;render()},
   kind(el){S.kind=el.dataset.v;S.sel=null;render()},
   selStamp(el){S.sel=S.sel===el.dataset.id?null:el.dataset.id;render()},
@@ -704,6 +722,7 @@ const A={
     <button class="btn ghost" data-act="saveNames">儲存暱稱</button>
     ${sw("long")}${sw("zhen")}
     <p class="hint">暱稱和顏色兩人共用，改了對方也會看到。</p>
+    <button class="btn ghost" data-act="importOpen">匯入紀錄</button>
     ${window.appSignOut?`<button class="btn ghost" data-act="signOut">登出</button>`:""}
     ${S.mode==="local"?`<div class="field"><span>預覽身分</span><div class="seg"><button data-act="role" data-v="long" aria-pressed="${S.me==="long"}">${esc(NAME.long)}</button><button data-act="role" data-v="zhen" aria-pressed="${S.me==="zhen"}">${esc(NAME.zhen)}</button></div></div>`:""}`)},
   saveNames(){Store.setNames({long:$("#name-long").value,zhen:$("#name-zhen").value});closeSheet();toast("暱稱已更新")},
