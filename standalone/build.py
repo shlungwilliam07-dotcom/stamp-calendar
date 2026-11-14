@@ -4,6 +4,7 @@ def r(a,b):
     global src
     assert src.count(a)==1,a; src=src.replace(a,b)
 FB='10.12.2'
+import time; VER=str(int(time.time()))
 r('<meta name="viewport" content="width=device-width, initial-scale=1">','''<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -32,8 +33,8 @@ r('<div id="toast" role="status"></div>','''<div id="toast" role="status"></div>
 <script src="https://www.gstatic.com/firebasejs/%s/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/%s/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/%s/firebase-firestore-compat.js"></script>
-<script src="config.js"></script>
-<script src="app.js"></script>'''%(FB,FB,FB))
+<script src="config.js?v=%s"></script>
+<script src="app.js?v=%s"></script>'''%(FB,FB,FB,VER,VER))
 r('預覽模式：資料只存在這台裝置，登入後才會兩人同步。','尚未設定 Firebase：資料只存在這台裝置。')
 dist=os.path.join(here,'..','docs'); os.makedirs(dist,exist_ok=True)
 open(os.path.join(dist,'index.html'),'w',encoding='utf-8').write(src)
@@ -42,3 +43,7 @@ json.dump({"name":"印章行事曆","short_name":"印章行事曆","start_url":"
   "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]},
   open(os.path.join(dist,'manifest.webmanifest'),'w',encoding='utf-8'),ensure_ascii=False,indent=1)
 print('built',dist)
+
+# Firebase Hosting 外殼：與登入網域同源，內容從 GitHub Pages 載入，所以改版只需推到 GitHub。
+host=os.path.join(here,'..','hosting'); os.makedirs(host,exist_ok=True)
+for f in ['icon-180.png','icon-192.png','icon-512.png','manifest.webmanifest']: shutil.copy(os.path.join(dist,f),host)

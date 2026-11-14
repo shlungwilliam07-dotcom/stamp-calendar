@@ -21,11 +21,15 @@
       else show("連不上資料庫，請檢查網路後重新開啟。", false, true);
     });
   });
+  // 與登入網域同源時（Firebase Hosting）用整頁跳轉，在 iPhone 主畫面 app 裡最穩定；其他網址用彈出視窗。
+  var sameOrigin = location.hostname === cfg.authDomain;
+  auth.getRedirectResult().catch(function (e) { show("登入失敗：" + ((e && e.message) || ""), true, false); });
   btn.addEventListener("click", function () {
     var p = new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
+    if (sameOrigin) { show("前往 Google 登入…", false, false); auth.signInWithRedirect(p); return; }
     auth.signInWithPopup(p).catch(function (e) {
       var c = e && e.code;
-      if (c === "auth/popup-blocked" || c === "auth/operation-not-supported-in-this-environment" || c === "auth/web-storage-unsupported") auth.signInWithRedirect(p);
+      if (c === "auth/popup-blocked" || c === "auth/operation-not-supported-in-this-environment" || c === "auth/web-storage-unsupported") show("這個瀏覽器擋下了登入視窗。請改用正式網址 https://" + cfg.authDomain + " 開啟。", true, false);
       else if (c !== "auth/popup-closed-by-user" && c !== "auth/cancelled-popup-request") show("登入失敗：" + (e.message || c), true, false);
     });
   });
