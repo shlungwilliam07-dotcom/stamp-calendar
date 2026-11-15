@@ -558,7 +558,7 @@ function viewList(){
       ${ws.length>1?`<div class="clhd"><i class="dot" style="background:${col(w)}"></i>${esc(NAME[w])}</div>`:""}
       ${open.map(i=>clRow(w,i)).join("")}
       <div class="row between"><button class="eadd" data-act="clAdd" data-w="${w}">＋　清單項目</button><button class="link" data-act="keepOpen" data-w="${w}">從 Keep 貼上更新</button></div>
-      ${done.length?`<button class="donehd" data-act="clShowDone" data-w="${w}">${clShowDone[w]?"▾":"▸"}　${done.length} 個已勾選項目</button>${clShowDone[w]?done.map(i=>clRow(w,i)).join(""):""}`:""}
+      ${done.length?`<button class="donehd" data-act="clShowDone" data-w="${w}">${clShowDone[w]?"▾":"▸"}　${done.length} 個已勾選項目</button>${clShowDone[w]?done.map(i=>clRow(w,i)).join("")+`<button class="link" style="padding:8px 0 4px 30px;display:block" data-act="clClearDone" data-w="${w}">清除全部已勾選項目</button>`:""}`:""}
     </section>`};
   return `
   <div class="row between">
@@ -708,6 +708,7 @@ const A={
   clToggle(el){const w=el.dataset.w, g=clGroup(w,el.dataset.id); if(!g.length) return; const v=!g[0].done; g.forEach(i=>i.done=v); clNorm(w); clTouch(w); render()},
   clIndent(el){const w=el.dataset.w, i=CL[w].find(x=>x.id===el.dataset.id); if(!i) return; i.indent=i.indent?0:1; clNorm(w);
     if(i.indent===0&&el.getAttribute("aria-label")==="縮排成子項目") toast("第一個項目不能縮排"); clTouch(w); render()},
+  clClearDone(el){ if(!armed(el,"再按一次，刪除所有已勾選項目")) return; const w=el.dataset.w; CL[w]=CL[w].filter(x=>!x.done); clNorm(w); clTouch(w); render(); toast("已清除") },
   clDel(el){const w=el.dataset.w; CL[w]=CL[w].filter(x=>x.id!==el.dataset.id); clNorm(w); clTouch(w); render()},
   listMine(el){S.listMine=el.dataset.v==="1";render()},
   listPast(){S.listPast=!S.listPast;render()},
