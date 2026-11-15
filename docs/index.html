@@ -244,8 +244,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="config.js?v=1794745481"></script>
-<script src="app.js?v=1794745481"></script>
+<script src="config.js?v=1794745602"></script>
+<script src="app.js?v=1794745602"></script>
 
 <script>
 (function(){
@@ -499,7 +499,7 @@ const clClean=i=>({id:String(i.id),text:String(i.text||""),done:!!i.done,indent:
 /* 列表文字 ⇄ 行事曆：列表是唯一資料來源，行事曆由列表文字解析出來 */
 const WDP="(?:\\s*[(（]\\s*(?:週|周|星期)?[日一二三四五六天]\\s*[)）])?";
 const TMP="(?:\\s*\\d{1,2}[:：]?\\d{2})?";
-const DASH="\\s*[-–—~～到至]\\s*";
+const DASH="\\s*[-‐‑‒–—―−~～〜到至]\\s*";
 const RE_DATE=new RegExp("^\\s*(\\d{1,2})\\/(\\d{1,2})"+WDP+"(?:"+TMP+DASH+"(\\d{1,2})\\/(\\d{1,2})"+WDP+TMP+"(?![\\d:：])|"+DASH+"(\\d{1,2})(?![\\d:：/])"+WDP+")?\\s*");
 const T1="(?:(\\d{1,2})[:：](\\d{2})|(\\d{2})(\\d{2}))";
 const RE_TIME=new RegExp("^"+T1+"(?:\\s*[-–~]\\s*"+T1+")?(?=\\s|$)\\s*");
@@ -751,6 +751,7 @@ const A={
     <button class="btn ghost" data-act="saveNames">儲存暱稱</button>
     ${sw("long")}${sw("zhen")}
     <p class="hint">暱稱和顏色兩人共用，改了對方也會看到。</p>
+    <p class="hint">版本 1115-1226</p>
     <button class="btn ghost" data-act="importOpen">匯入紀錄</button>
     ${window.appSignOut?`<button class="btn ghost" data-act="signOut">登出</button>`:""}
     ${S.mode==="local"?`<div class="field"><span>預覽身分</span><div class="seg"><button data-act="role" data-v="long" aria-pressed="${S.me==="long"}">${esc(NAME.long)}</button><button data-act="role" data-v="zhen" aria-pressed="${S.me==="zhen"}">${esc(NAME.zhen)}</button></div></div>`:""}`)},

@@ -37,6 +37,7 @@ r('<div id="toast" role="status"></div>','''<div id="toast" role="status"></div>
 <script src="app.js?v=%s"></script>'''%(FB,FB,FB,VER,VER))
 r('預覽模式：資料只存在這台裝置，登入後才會兩人同步。','尚未設定 Firebase：資料只存在這台裝置。')
 dist=os.path.join(here,'..','docs'); os.makedirs(dist,exist_ok=True)
+import datetime; src=src.replace('__BUILD__',datetime.datetime.utcnow().strftime('%m%d-%H%M'))
 open(os.path.join(dist,'index.html'),'w',encoding='utf-8').write(src)
 for f in ['config.js','app.js']: shutil.copy(os.path.join(here,f),dist)
 json.dump({"name":"印章行事曆","short_name":"印章行事曆","start_url":"./","scope":"./","display":"standalone","background_color":"#ffffff","theme_color":"#ffffff","lang":"zh-Hant",
