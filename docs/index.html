@@ -244,8 +244,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="config.js?v=1794745061"></script>
-<script src="app.js?v=1794745061"></script>
+<script src="config.js?v=1794745481"></script>
+<script src="app.js?v=1794745481"></script>
 
 <script>
 (function(){
@@ -498,7 +498,9 @@ let clMigrated=false, focusNext=null, drag=null;
 const clClean=i=>({id:String(i.id),text:String(i.text||""),done:!!i.done,indent:i.indent?1:0,both:!!i.both,k:!!i.k});
 /* 列表文字 ⇄ 行事曆：列表是唯一資料來源，行事曆由列表文字解析出來 */
 const WDP="(?:\\s*[(（]\\s*(?:週|周|星期)?[日一二三四五六天]\\s*[)）])?";
-const RE_DATE=new RegExp("^\\s*(\\d{1,2})\\/(\\d{1,2})"+WDP+"(?:\\s*[-–—~～到至]\\s*(?:(\\d{1,2})\\/)?(\\d{1,2})"+WDP+")?\\s*");
+const TMP="(?:\\s*\\d{1,2}[:：]?\\d{2})?";
+const DASH="\\s*[-–—~～到至]\\s*";
+const RE_DATE=new RegExp("^\\s*(\\d{1,2})\\/(\\d{1,2})"+WDP+"(?:"+TMP+DASH+"(\\d{1,2})\\/(\\d{1,2})"+WDP+TMP+"(?![\\d:：])|"+DASH+"(\\d{1,2})(?![\\d:：/])"+WDP+")?\\s*");
 const T1="(?:(\\d{1,2})[:：](\\d{2})|(\\d{2})(\\d{2}))";
 const RE_TIME=new RegExp("^"+T1+"(?:\\s*[-–~]\\s*"+T1+")?(?=\\s|$)\\s*");
 function yearFor(m,d){const now=new Date(), y=now.getFullYear(); let best=null;
@@ -506,7 +508,7 @@ function yearFor(m,d){const now=new Date(), y=now.getFullYear(); let best=null;
 function parseItem(text){
   let t=String(text||""), date=null, time=null; const m=t.match(RE_DATE);
   if(m&&+m[1]>=1&&+m[1]<=12&&+m[2]>=1&&+m[2]<=31){const a=yearFor(+m[1],+m[2]); if(a){date=[ymd(a)];
-    if(m[4]){const em=m[3]?+m[3]:+m[1]; const b=new Date(a.getFullYear()+(em<+m[1]?1:0),em-1,+m[4]); for(let d=new Date(a.getFullYear(),a.getMonth(),a.getDate()+1),n=0;d<=b&&n<31;d.setDate(d.getDate()+1),n++) date.push(ymd(d))}
+    const ed=m[4]||m[5]; if(ed){const em=m[3]?+m[3]:+m[1]; const b=new Date(a.getFullYear()+(em<+m[1]?1:0),em-1,+ed); for(let d=new Date(a.getFullYear(),a.getMonth(),a.getDate()+1),n=0;d<=b&&n<31;d.setDate(d.getDate()+1),n++) date.push(ymd(d))}
     t=t.slice(m[0].length)}}
   const k=t.match(RE_TIME);
   if(k){const sh=+(k[1]||k[3]), sm=+(k[2]||k[4]), has=k[5]!=null||k[7]!=null, eh=+(k[5]||k[7]), em=+(k[6]||k[8]);
