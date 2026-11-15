@@ -1,2 +1,3 @@
 standalone/firestore.rules
 *.zip
+__pycache__/
