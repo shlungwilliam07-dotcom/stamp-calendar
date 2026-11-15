@@ -8,7 +8,7 @@ import json, os, sys, time, uuid
 
 def clean(i):
     return {"id": str(i.get("id")), "text": str(i.get("text") or ""), "done": bool(i.get("done")),
-            "indent": 1 if i.get("indent") else 0, "both": bool(i.get("both")), "k": bool(i.get("k"))}
+            "indent": 1 if i.get("indent") else 0, "both": bool(i.get("both")), "k": bool(i.get("k")), "g": bool(i.get("g"))}
 
 
 def merge(old, rows):
@@ -29,7 +29,7 @@ def merge(old, rows):
         if m:
             used.add(m["id"]); out.append({**m, "done": x["done"], "k": True})
         else:
-            out.append({"id": uuid.uuid4().hex[:14], "text": x["text"], "done": x["done"], "indent": x["indent"], "both": False, "k": True})
+            out.append({"id": uuid.uuid4().hex[:14], "text": x["text"], "done": x["done"], "indent": x["indent"], "both": False, "k": True, "g": False})
     last = -1
     for it in old:
         at = next((n for n, o in enumerate(out) if o["id"] == it["id"]), -1)

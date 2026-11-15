@@ -468,7 +468,7 @@ function whoDot(w){return w==="both"?"linear-gradient(90deg,var(--long) 50%,var(
 /* 列表：每人一張可縮排的勾選清單 */
 const CL={long:[],zhen:[]}, clLoaded={long:false,zhen:false}, clDirty={long:false,zhen:false}, clTimer={long:null,zhen:null}, clShowDone={long:false,zhen:false};
 let clMigrated=false, focusNext=null, drag=null;
-const clClean=i=>({id:String(i.id),text:String(i.text||""),done:!!i.done,indent:i.indent?1:0,both:!!i.both,k:!!i.k});
+const clClean=i=>({id:String(i.id),text:String(i.text||""),done:!!i.done,indent:i.indent?1:0,both:!!i.both,k:!!i.k,g:!!i.g});
 /* 列表文字 ⇄ 行事曆：列表是唯一資料來源，行事曆由列表文字解析出來 */
 const WDP="(?:\\s*[(（][^()（）\\d]{1,3}[)）])?";
 const TMP="(?:\\s*\\d{1,2}[:：]?\\d{2})?";
