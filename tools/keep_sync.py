@@ -3,7 +3,9 @@
 使用非官方的 gkeepapi，Google 隨時可能讓它失效。記事內容不會印到記錄檔。
 環境變數：KEEP_EMAIL, KEEP_MASTER_TOKEN, KEEP_NOTE_TITLE, FIREBASE_SERVICE_ACCOUNT, KEEP_OWNER (long|zhen，預設 zhen)
 """
-import json, os, sys, time, uuid
+import datetime as dt, json, os, re, sys, time, uuid
+from zoneinfo import ZoneInfo
+DATE_RE = re.compile(r"^\s*(\d{1,2})/(\d{1,2})")
 
 
 def clean(i):
@@ -41,10 +43,38 @@ def merge(old, rows):
                 while pos < len(out) and out[pos]["indent"]:
                     pos += 1
             out.insert(pos, dict(it)); last = pos
+    out = sort_by_date(out, dt.datetime.now(ZoneInfo("Asia/Taipei")).date())
     first = next((i for i in out if not i["done"]), None)
     if first:
         first["indent"] = 0
     return out
+
+
+def sort_by_date(items, today):
+    """未完成的項目依開頭日期排序（子項目跟著主項目），沒有日期的排在最後，已完成的維持在尾端。"""
+    open_, done = [i for i in items if not i["done"]], [i for i in items if i["done"]]
+    groups = []
+    for i in open_:
+        if not i["indent"] or not groups:
+            groups.append([i])
+        else:
+            groups[-1].append(i)
+
+    def key(g):
+        m = DATE_RE.match(g[0]["text"])
+        if not m:
+            return ("~", 0)
+        best = None
+        for y in (today.year - 1, today.year, today.year + 1):
+            try:
+                d = dt.date(y, int(m.group(1)), int(m.group(2)))
+            except ValueError:
+                return ("~", 0)
+            if best is None or abs((d - today).days) < abs((best - today).days):
+                best = d
+        return (best.isoformat(), 0)
+    order = sorted(range(len(groups)), key=lambda n: (key(groups[n]), n))
+    return [i for n in order for i in groups[n]] + done
 
 
 def keep_rows():

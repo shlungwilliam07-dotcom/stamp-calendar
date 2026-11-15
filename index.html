@@ -529,12 +529,20 @@ function evMigrate(){
   S.oldEvents.slice().forEach(e=>Store.remove("events",e.id));
 }
 function clNorm(w){const f=CL[w].find(i=>!i.done); if(f) f.indent=0}
-function clTouch(w){clDirty[w]=true;clearTimeout(clTimer[w]);clTimer[w]=setTimeout(()=>{clTimer[w]=null;clSave(w)},600)}
+function clSort(w){
+  const arr=CL[w], open=arr.filter(i=>!i.done), done=arr.filter(i=>i.done), groups=[];
+  open.forEach(i=>{ if(!i.indent||!groups.length) groups.push({items:[i]}); else groups[groups.length-1].items.push(i) });
+  groups.forEach((g,n)=>{const p=parseItem(g.items[0].text); g.key=p.date?p.date[0]:"~"; g.n=n});
+  groups.sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:a.n-b.n);
+  CL[w]=[].concat(...groups.map(g=>g.items),done);
+}
+const typing=()=>{const a=document.activeElement;return !!(a&&a.dataset&&a.dataset.cl)};
+function clTouch(w){ if(!typing()) clSort(w); clDirty[w]=true;clearTimeout(clTimer[w]);clTimer[w]=setTimeout(()=>{clTimer[w]=null;clSave(w)},600)}
 function clSave(w){const items=CL[w].map(clClean);
   if(db) db.doc("checklists/"+w).set({items,uts:Date.now()}).then(()=>{ if(!clTimer[w]) clDirty[w]=false },e=>{clDirty[w]=false;fail(e)});
   else{ls.set("cl-"+w,items);clDirty[w]=false}}
 function clLoad(w,items){clLoaded[w]=true; if(clDirty[w]) return false; const next=(items||[]).map(clClean);
-  if(JSON.stringify(next)===JSON.stringify(CL[w])) return false; CL[w]=next; return true}
+  if(JSON.stringify(next)===JSON.stringify(CL[w])) return false; CL[w]=next; clSort(w); return true}
 function clMigrate(){
   if(clMigrated||!clLoaded.long||!clLoaded.zhen||(S.mode==="cloud"&&S.me!=="long")||!(S.notes.length||S.todos.length)) return; clMigrated=true;
   const push=(w,text,indent)=>{ if(text.trim()) CL[w].push({id:uid(),text:text.trim(),done:false,indent}) };
@@ -739,6 +747,10 @@ document.addEventListener("click",ev=>{
 let composing=false, pendingRender=false;
 document.addEventListener("compositionstart",()=>{composing=true});
 document.addEventListener("compositionend",()=>{composing=false; if(pendingRender){pendingRender=false;setTimeout(render,0)}});
+document.addEventListener("focusout",ev=>{
+  const t=ev.target, w=t.dataset&&t.dataset.cl; if(!w) return;
+  setTimeout(()=>{ if(typing()||drag) return; const before=CL[w].map(i=>i.id).join(); clSort(w); if(CL[w].map(i=>i.id).join()!==before){clTouch(w);render()} },80);
+});
 document.addEventListener("input",ev=>{
   const t=ev.target, w=t.dataset&&t.dataset.cl; if(!w) return;
   const i=CL[w].find(x=>x.id===t.dataset.id); if(i){i.text=t.value.replace(/\n/g," ");autosize(t);clTouch(w)}

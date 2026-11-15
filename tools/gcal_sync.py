@@ -76,6 +76,33 @@ def item_date(text, year):
         return None
 
 
+def sort_by_date(items, today):
+    """未完成的項目依開頭日期排序（子項目跟著主項目），沒有日期的排在最後，已完成的維持在尾端。"""
+    open_, done = [i for i in items if not i["done"]], [i for i in items if i["done"]]
+    groups = []
+    for i in open_:
+        if not i["indent"] or not groups:
+            groups.append([i])
+        else:
+            groups[-1].append(i)
+
+    def key(g):
+        m = DATE_RE.match(g[0]["text"])
+        if not m:
+            return ("~", 0)
+        best = None
+        for y in (today.year - 1, today.year, today.year + 1):
+            try:
+                d = dt.date(y, int(m.group(1)), int(m.group(2)))
+            except ValueError:
+                return ("~", 0)
+            if best is None or abs((d - today).days) < abs((best - today).days):
+                best = d
+        return (best.isoformat(), 0)
+    order = sorted(range(len(groups)), key=lambda n: (key(groups[n]), n))
+    return [i for n in order for i in groups[n]] + done
+
+
 def merge(old, texts, today):
     """日曆項目以日曆為準；其他項目（Keep 來的、手動加的）原位保留；新日曆項目依日期插入。"""
     old = [clean(i) for i in old]
@@ -97,6 +124,7 @@ def merge(old, texts, today):
         if pos == len(out):
             pos = max([n + 1 for n, it in enumerate(out) if not it["done"]] or [0])
         out.insert(pos, {"id": uuid.uuid4().hex[:14], "text": text, "done": False, "indent": 0, "both": False, "k": False, "g": True})
+    out = sort_by_date(out, today)
     first = next((i for i in out if not i["done"]), None)
     if first:
         first["indent"] = 0
