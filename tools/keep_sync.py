@@ -39,6 +39,40 @@ def merge(old, rows):
     return out
 
 
+import datetime, re
+DATE_RE = re.compile(r"^\s*(\d{1,2})/(\d{1,2})")
+
+
+def is_old_done(text, done, today=None):
+    """已勾選且日期已過（含去年）的項目不同步。"""
+    if not done:
+        return False
+    m = DATE_RE.match(text)
+    if not m:
+        return False
+    today = today or datetime.date.today()
+    try:
+        d = datetime.date(today.year, int(m.group(1)), int(m.group(2)))
+    except ValueError:
+        return False
+    if (d - today).days > 60:   # 日期在很久以後，應是去年的
+        return True
+    return d < today
+
+
+def drop_old(rows):
+    out, skip_children = [], False
+    for x in rows:
+        if not x["indent"]:
+            skip_children = is_old_done(x["text"], x["done"])
+            if skip_children:
+                continue
+        elif skip_children or is_old_done(x["text"], x["done"]):
+            continue
+        out.append(x)
+    return out
+
+
 def keep_rows():
     import gkeepapi
     keep = gkeepapi.Keep()
@@ -53,7 +87,7 @@ def keep_rows():
         text = (it.text or "").strip()[:300]
         if text:
             rows.append({"text": text, "indent": 1 if it.indented else 0, "done": bool(it.checked)})
-    return rows
+    return drop_old(rows)
 
 
 def main():

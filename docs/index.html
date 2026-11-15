@@ -244,8 +244,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="config.js?v=1794714370"></script>
-<script src="app.js?v=1794714370"></script>
+<script src="config.js?v=1794744493"></script>
+<script src="app.js?v=1794744493"></script>
 
 <script>
 (function(){
@@ -602,7 +602,11 @@ function keepParse(text){
   const rows=[]; lines.forEach(l=>{const m=l.match(/^([ \t　]*)(?:[-*•·]\s+)?(?:\[([ xX✓✔]?)\]|([☐□])|([☑✓✔■]))?\s*(.*)$/); const t=(m[5]||"").trim().slice(0,300); if(!t) return;
     rows.push({text:t,indent:m[1].length>=1?1:0,done:!!(m[4]||(m[2]&&m[2].trim()))})});
   if(!rows.some(x=>x.indent)){let under=false; rows.forEach(x=>{const p=parseItem(x.text); if(p.date){under=!p.title} else if(under) x.indent=1})}
-  if(rows[0]) rows[0].indent=0; return rows;
+  const td=today(), lim=ymd(new Date(Date.now()+60*864e5));
+  const oldDone=x=>{ if(!x.done) return false; const p=parseItem(x.text); if(!p.date) return false; const d=p.date[p.date.length-1]; return d<td||d>lim };
+  const kept=[]; let skip=false;
+  rows.forEach(x=>{ if(!x.indent){skip=oldDone(x); if(skip) return} else if(skip||oldDone(x)) return; kept.push(x)});
+  if(kept[0]) kept[0].indent=0; return kept;
 }
 function keepMerge(old,rows){
   const used=new Set(); let added=0;
