@@ -468,7 +468,7 @@ function whoDot(w){return w==="both"?"linear-gradient(90deg,var(--long) 50%,var(
 /* 列表：每人一張可縮排的勾選清單 */
 const CL={long:[],zhen:[]}, clLoaded={long:false,zhen:false}, clDirty={long:false,zhen:false}, clTimer={long:null,zhen:null}, clShowDone={long:false,zhen:false};
 let clMigrated=false, focusNext=null, drag=null;
-const clClean=i=>({id:String(i.id),text:String(i.text||""),done:!!i.done,indent:i.indent?1:0,both:!!i.both});
+const clClean=i=>({id:String(i.id),text:String(i.text||""),done:!!i.done,indent:i.indent?1:0,both:!!i.both,k:!!i.k});
 /* 列表文字 ⇄ 行事曆：列表是唯一資料來源，行事曆由列表文字解析出來 */
 const RE_DATE=/^\s*(\d{1,2})\/(\d{1,2})(?:\s*[-–~]\s*(\d{1,2})\/(\d{1,2}))?\s*(?:[(（]\s*[日一二三四五六]\s*[)）])?\s*/;
 const T1="(?:(\\d{1,2})[:：](\\d{2})|(\\d{2})(\\d{2}))";
@@ -557,7 +557,7 @@ function viewList(){
     return `<section class="cl" data-w="${w}">
       ${ws.length>1?`<div class="clhd"><i class="dot" style="background:${col(w)}"></i>${esc(NAME[w])}</div>`:""}
       ${open.map(i=>clRow(w,i)).join("")}
-      <button class="eadd" data-act="clAdd" data-w="${w}">＋　清單項目</button>
+      <div class="row between"><button class="eadd" data-act="clAdd" data-w="${w}">＋　清單項目</button><button class="link" data-act="keepOpen" data-w="${w}">從 Keep 貼上更新</button></div>
       ${done.length?`<button class="donehd" data-act="clShowDone" data-w="${w}">${clShowDone[w]?"▾":"▸"}　${done.length} 個已勾選項目</button>${clShowDone[w]?done.map(i=>clRow(w,i)).join(""):""}`:""}
     </section>`};
   return `
@@ -567,6 +567,23 @@ function viewList(){
   </div>
   <p class="hint">開頭寫日期就會進行事曆，例如「11/14 1800 - 2100 晚餐」。有圓點的項目已在行事曆。</p>
   ${ws.map(sec).join("")}`;
+}
+/* Keep 同步：Keep 來的項目標記 k，之後以 Keep 為準；在 app 裡自己加的項目保留在原本的相對位置 */
+function keepParse(text){
+  let lines=String(text||"").replace(/\r/g,"").split("\n");
+  if(lines.length>2&&lines[0].trim()&&!lines[1].trim()&&!parseItem(lines[0]).date&&!/^\s*(\[|☐|☑|□)/.test(lines[0])) lines=lines.slice(2);
+  const rows=[]; lines.forEach(l=>{const m=l.match(/^([ \t　]*)(?:[-*•·]\s+)?(?:\[([ xX✓✔]?)\]|([☐□])|([☑✓✔■]))?\s*(.*)$/); const t=(m[5]||"").trim().slice(0,300); if(!t) return;
+    rows.push({text:t,indent:m[1].length>=1?1:0,done:!!(m[4]||(m[2]&&m[2].trim()))})});
+  if(!rows.some(x=>x.indent)){let under=false; rows.forEach(x=>{const p=parseItem(x.text); if(p.date){under=!p.title} else if(under) x.indent=1})}
+  if(rows[0]) rows[0].indent=0; return rows;
+}
+function keepMerge(old,rows){
+  const used=new Set(); let added=0;
+  const out=rows.map(x=>{const m=old.find(i=>i.k&&!used.has(i.id)&&i.text===x.text&&i.indent===x.indent)||old.find(i=>!i.k&&!used.has(i.id)&&i.text===x.text&&i.indent===x.indent);
+    if(m){used.add(m.id);return Object.assign({},m,{done:x.done,k:true})} added++; return {id:uid(),text:x.text,done:x.done,indent:x.indent,both:false,k:true}});
+  let last=-1, removed=0;
+  old.forEach(it=>{const at=out.findIndex(o=>o.id===it.id); if(at>=0){last=at;return} if(it.k){removed++;return} let pos=last+1; if(!it.indent) while(out[pos]&&out[pos].indent) pos++; out.splice(pos,0,Object.assign({},it)); last=pos});
+  return {items:out,added,removed};
 }
 function clGroup(w,id){const arr=CL[w], k=arr.findIndex(i=>i.id===id), g=[]; if(k<0) return g; g.push(arr[k]);
   if(!arr[k].indent) for(let j=k+1;j<arr.length&&arr[j].indent;j++) g.push(arr[j]); return g}
@@ -673,6 +690,13 @@ const A={
   free(){freeSheet()},
   minH(el){S.minH=+el.dataset.v;freeSheet()},
   book2(el){evSheet({who:"both",date:el.dataset.d,allDay:false,start:el.dataset.s,end:el.dataset.e,title:"約會"})},
+  keepOpen(el){const w=el.dataset.w; sheet(`<div class="row between"><p class="h2">從 Keep 更新${esc(NAME[w])}的列表</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
+    <label class="field"><span>在 Keep 複製整則記事的內容，貼在這裡</span><textarea id="keep-text" rows="10" placeholder="11/14 (六)&#10;1000 - 1700 綠領課程&#10;龍吃飯"></textarea></label>
+    <p class="hint">以 Keep 為準：Keep 新增的會加入、刪掉的會移除、勾選狀態會跟著變。在 app 裡自己加的項目會保留。</p>
+    <button class="btn" data-act="keepRun" data-w="${w}">更新</button>`); setTimeout(()=>$("#keep-text")&&$("#keep-text").focus(),50)},
+  keepRun(el){const w=el.dataset.w, rows=keepParse($("#keep-text").value); if(!rows.length){toast("沒有讀到任何項目");return}
+    if(!clLoaded[w]){toast("資料還在讀取，請稍後再試");return}
+    const m=keepMerge(CL[w],rows); CL[w]=m.items; clNorm(w); clTouch(w); closeSheet(); render(); toast("已更新：新增 "+m.added+" 項、移除 "+m.removed+" 項")},
   clView(el){S.clView=el.dataset.v;ls.set("clView",S.clView);render()},
   clShowDone(el){clShowDone[el.dataset.w]=!clShowDone[el.dataset.w];render()},
   clAdd(el){const w=el.dataset.w, arr=CL[w], it={id:uid(),text:"",done:false,indent:0}; let k=-1; arr.forEach((i,j)=>{if(!i.done)k=j});
