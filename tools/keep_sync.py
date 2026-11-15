@@ -57,6 +57,9 @@ def keep_rows():
 
 
 def main():
+    need = ["KEEP_EMAIL", "KEEP_MASTER_TOKEN", "KEEP_NOTE_TITLE", "FIREBASE_SERVICE_ACCOUNT"]
+    if any(not os.environ.get(k) for k in need):
+        print("尚未設定 Secrets，略過"); return
     import firebase_admin
     from firebase_admin import credentials, firestore
     rows = keep_rows()
