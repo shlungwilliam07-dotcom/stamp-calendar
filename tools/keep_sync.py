@@ -12,12 +12,20 @@ def clean(i):
 
 
 def merge(old, rows):
-    """與網頁端 keepMerge 相同：Keep 項目以 Keep 為準，app 自己加的項目留在原本的相對位置。"""
+    """與網頁端 keepMerge 相同：Keep 項目以 Keep 為準；已勾選但 app 裡沒有的不進來；app 自己加的項目留在原本的相對位置。"""
     old = [clean(i) for i in old]
     used, out = set(), []
+    skip_children = False
     for x in rows:
         m = next((i for i in old if i["k"] and i["id"] not in used and i["text"] == x["text"] and i["indent"] == x["indent"]), None) \
             or next((i for i in old if not i["k"] and i["id"] not in used and i["text"] == x["text"] and i["indent"] == x["indent"]), None)
+        # 在 Keep 已勾選、但 app 裡還沒有的項目不同步（連同它的子項目）
+        if not x["indent"]:
+            skip_children = x["done"] and m is None
+            if skip_children:
+                continue
+        elif skip_children or (x["done"] and m is None):
+            continue
         if m:
             used.add(m["id"]); out.append({**m, "done": x["done"], "k": True})
         else:
@@ -39,40 +47,6 @@ def merge(old, rows):
     return out
 
 
-import datetime, re
-DATE_RE = re.compile(r"^\s*(\d{1,2})/(\d{1,2})")
-
-
-def is_old_done(text, done, today=None):
-    """已勾選且日期已過（含去年）的項目不同步。"""
-    if not done:
-        return False
-    m = DATE_RE.match(text)
-    if not m:
-        return False
-    today = today or datetime.date.today()
-    try:
-        d = datetime.date(today.year, int(m.group(1)), int(m.group(2)))
-    except ValueError:
-        return False
-    if (d - today).days > 60:   # 日期在很久以後，應是去年的
-        return True
-    return d < today
-
-
-def drop_old(rows):
-    out, skip_children = [], False
-    for x in rows:
-        if not x["indent"]:
-            skip_children = is_old_done(x["text"], x["done"])
-            if skip_children:
-                continue
-        elif skip_children or is_old_done(x["text"], x["done"]):
-            continue
-        out.append(x)
-    return out
-
-
 def keep_rows():
     import gkeepapi
     keep = gkeepapi.Keep()
@@ -87,7 +61,7 @@ def keep_rows():
         text = (it.text or "").strip()[:300]
         if text:
             rows.append({"text": text, "indent": 1 if it.indented else 0, "done": bool(it.checked)})
-    return drop_old(rows)
+    return rows
 
 
 def main():

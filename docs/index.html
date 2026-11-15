@@ -244,8 +244,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="config.js?v=1794744580"></script>
-<script src="app.js?v=1794744580"></script>
+<script src="config.js?v=1794744803"></script>
+<script src="app.js?v=1794744803"></script>
 
 <script>
 (function(){
@@ -602,16 +602,13 @@ function keepParse(text){
   const rows=[]; lines.forEach(l=>{const m=l.match(/^([ \t　]*)(?:[-*•·]\s+)?(?:\[([ xX✓✔]?)\]|([☐□])|([☑✓✔■]))?\s*(.*)$/); const t=(m[5]||"").trim().slice(0,300); if(!t) return;
     rows.push({text:t,indent:m[1].length>=1?1:0,done:!!(m[4]||(m[2]&&m[2].trim()))})});
   if(!rows.some(x=>x.indent)){let under=false; rows.forEach(x=>{const p=parseItem(x.text); if(p.date){under=!p.title} else if(under) x.indent=1})}
-  const td=today(), lim=ymd(new Date(Date.now()+60*864e5));
-  const oldDone=x=>{ if(!x.done) return false; const p=parseItem(x.text); if(!p.date) return false; const d=p.date[p.date.length-1]; return d<td||d>lim };
-  const kept=[]; let skip=false;
-  rows.forEach(x=>{ if(!x.indent){skip=oldDone(x); if(skip) return} else if(skip||oldDone(x)) return; kept.push(x)});
-  if(kept[0]) kept[0].indent=0; return kept;
+  if(rows[0]) rows[0].indent=0; return rows;
 }
 function keepMerge(old,rows){
-  const used=new Set(); let added=0;
-  const out=rows.map(x=>{const m=old.find(i=>i.k&&!used.has(i.id)&&i.text===x.text&&i.indent===x.indent)||old.find(i=>!i.k&&!used.has(i.id)&&i.text===x.text&&i.indent===x.indent);
-    if(m){used.add(m.id);return Object.assign({},m,{done:x.done,k:true})} added++; return {id:uid(),text:x.text,done:x.done,indent:x.indent,both:false,k:true}});
+  const used=new Set(); let added=0, skip=false; const out=[];
+  rows.forEach(x=>{const m=old.find(i=>i.k&&!used.has(i.id)&&i.text===x.text&&i.indent===x.indent)||old.find(i=>!i.k&&!used.has(i.id)&&i.text===x.text&&i.indent===x.indent);
+    if(!x.indent){skip=x.done&&!m; if(skip) return} else if(skip||(x.done&&!m)) return;
+    if(m){used.add(m.id);out.push(Object.assign({},m,{done:x.done,k:true}))} else{added++; out.push({id:uid(),text:x.text,done:x.done,indent:x.indent,both:false,k:true})}});
   let last=-1, removed=0;
   old.forEach(it=>{const at=out.findIndex(o=>o.id===it.id); if(at>=0){last=at;return} if(it.k){removed++;return} let pos=last+1; if(!it.indent) while(out[pos]&&out[pos].indent) pos++; out.splice(pos,0,Object.assign({},it)); last=pos});
   return {items:out,added,removed};
@@ -723,7 +720,7 @@ const A={
   book2(el){evSheet({who:"both",date:el.dataset.d,allDay:false,start:el.dataset.s,end:el.dataset.e,title:"約會"})},
   keepOpen(el){const w=el.dataset.w; sheet(`<div class="row between"><p class="h2">從 Keep 更新${esc(NAME[w])}的列表</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
     <label class="field"><span>在 Keep 複製整則記事的內容，貼在這裡</span><textarea id="keep-text" rows="10" placeholder="11/14 (六)&#10;1000 - 1700 綠領課程&#10;龍吃飯"></textarea></label>
-    <p class="hint">以 Keep 為準：Keep 新增的會加入、刪掉的會移除、勾選狀態會跟著變。在 app 裡自己加的項目會保留。</p>
+    <p class="hint">以 Keep 為準：Keep 新增的會加入、刪掉的會移除、勾選狀態會跟著變。Keep 裡已勾選但 app 還沒有的不會進來。在 app 裡自己加的項目會保留。</p>
     <button class="btn" data-act="keepRun" data-w="${w}">更新</button>`); setTimeout(()=>$("#keep-text")&&$("#keep-text").focus(),50)},
   keepRun(el){const w=el.dataset.w, rows=keepParse($("#keep-text").value); if(!rows.length){toast("沒有讀到任何項目");return}
     if(!clLoaded[w]){toast("資料還在讀取，請稍後再試");return}
