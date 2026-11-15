@@ -111,8 +111,13 @@ def main():
     today = dt.datetime.now(TZ).date()
     start = max(today, dt.date.fromisoformat(os.environ["GCAL_FROM"])) if os.environ.get("GCAL_FROM") else today
     days = int(os.environ.get("GCAL_DAYS") or 90)
-    r = requests.get(os.environ["GCAL_ICS_URL"], timeout=30)
-    r.raise_for_status()
+    url = os.environ["GCAL_ICS_URL"].strip()
+    if "/private-" not in url or not url.endswith(".ics"):
+        sys.exit("GCAL_ICS_URL 看起來不是「iCal 格式的私人網址」（應含 /private-… 並以 .ics 結尾）。請到 Google 日曆設定 → 整合日曆 重新複製。")
+    r = requests.get(url, timeout=30)
+    if r.status_code != 200:
+        hint = {404: "網址錯誤或已重設，請重新複製私人網址", 401: "沒有權限，請確認是「私人網址」不是「公開網址」", 403: "沒有權限，請確認是「私人網址」不是「公開網址」"}.get(r.status_code, "")
+        sys.exit("讀取 Google 日曆失敗：HTTP %d。%s" % (r.status_code, hint))
     texts = calendar_rows(r.content, start, days)
     who = os.environ.get("GCAL_OWNER") or "long"
     if who not in ("long", "zhen"):
