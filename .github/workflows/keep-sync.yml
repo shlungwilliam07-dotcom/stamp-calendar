@@ -23,5 +23,5 @@ jobs:
           KEEP_EMAIL: ${{ secrets.KEEP_EMAIL }}
           KEEP_MASTER_TOKEN: ${{ secrets.KEEP_MASTER_TOKEN }}
           KEEP_NOTE_TITLE: ${{ secrets.KEEP_NOTE_TITLE }}
-          KEEP_OWNER: zhen
+          KEEP_OWNER: ${{ secrets.KEEP_OWNER }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
