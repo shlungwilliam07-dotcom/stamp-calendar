@@ -19,6 +19,7 @@
   --bad:#6b7d96;
   --long:#8fa3b3;
   --zhen:#d4a5a5;
+  --both:#b4a7b8;
   --display:"Noto Serif TC","Songti TC",serif;
   --body:"Noto Sans TC","PingFang TC","Heiti TC",system-ui,sans-serif;
 }
@@ -87,18 +88,16 @@ nav button[aria-current="true"]::before{content:"";position:absolute;top:-1px;le
 .cal-title{font-family:var(--display);font-size:18px;font-weight:500;font-variant-numeric:tabular-nums}
 .grid7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 .wd{font-size:11px;color:var(--muted);text-align:center;padding:6px 0}
-.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:19px;border-top:1px solid var(--line);padding:3px 0 6px;position:relative;column-gap:2px}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:auto;border-top:1px solid var(--line);padding:3px 0 6px;position:relative;column-gap:2px}
 .wk .cell{grid-row:1/-1;background:none;padding:0;min-height:0;border:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
 .wk .n{font-size:12px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-variant-numeric:tabular-nums;margin:1px auto 2px;color:var(--ink)}
 .wk .out .n{color:#c9cdd3}
 .wk .today .n{background:var(--ink);color:#fff}
-.bar{z-index:1;font-size:11px;line-height:17px;height:17px;padding:0 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;color:var(--ink);background:color-mix(in srgb,var(--c) 32%,#fff);min-width:0;margin:1px 0}
+.bar{z-index:1;font-size:11px;line-height:1.35;padding:2px 5px;border-radius:5px;text-align:left;color:var(--ink);background:color-mix(in srgb,var(--c) 32%,#fff);min-width:0;margin:1px 0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;word-break:break-all;overflow-wrap:anywhere;align-self:start}
 .bar.cont-l{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-2px;padding-left:6px}
 .bar.cont-r{border-top-right-radius:0;border-bottom-right-radius:0;margin-right:-2px}
-.bar.both{background:linear-gradient(135deg,color-mix(in srgb,var(--long) 36%,#fff),color-mix(in srgb,var(--zhen) 36%,#fff))}
 .bar.timed::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--c);margin:0 4px 1px 0;vertical-align:middle}
-.bar.both.timed::before{background:linear-gradient(90deg,var(--long) 50%,var(--zhen) 50%)}
-.more{z-index:1;font-size:10px;color:var(--muted);padding-left:4px;line-height:17px;text-align:left}
+.more{z-index:1;font-size:10px;color:var(--muted);padding-left:4px;line-height:17px;text-align:left;align-self:start}
 .week{display:grid;grid-template-columns:30px repeat(7,minmax(0,1fr));border-top:1px solid var(--line)}
 .week .hd{text-align:center;padding:6px 0;font-size:11px;color:var(--muted)}
 .week .hd b{display:grid;place-items:center;width:24px;height:24px;margin:2px auto 0;border-radius:50%;font-size:13px;font-weight:400;color:var(--ink)}
@@ -108,11 +107,9 @@ nav button[aria-current="true"]::before{content:"";position:absolute;top:-1px;le
 .hours span{position:absolute;right:4px;font-size:10px;color:var(--muted);transform:translateY(-50%);font-variant-numeric:tabular-nums}
 .col{position:relative;border-left:1px solid var(--line);background-image:linear-gradient(var(--line) 1px,transparent 1px);background-size:100% 40px;display:block;width:100%}
 .band{position:absolute;left:0;right:0;background:var(--soft);z-index:0;pointer-events:none}
-.ev{position:absolute;z-index:1;border-radius:5px;padding:2px 4px;font-size:11px;line-height:1.35;overflow:hidden;text-align:left;background:color-mix(in srgb,var(--c) 32%,#fff);color:var(--ink);word-break:keep-all;overflow-wrap:normal}
-.ev.both{background:linear-gradient(135deg,color-mix(in srgb,var(--long) 36%,#fff),color-mix(in srgb,var(--zhen) 36%,#fff))}
+.ev{position:absolute;z-index:1;border-radius:5px;padding:2px 4px;font-size:11px;line-height:1.35;overflow:hidden;text-align:left;background:color-mix(in srgb,var(--c) 32%,#fff);color:var(--ink);word-break:break-all;overflow-wrap:anywhere}
 .ev .hint{display:block;font-size:9px}
-.allday .chip{font-size:10px;line-height:1.6;padding:0 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:color-mix(in srgb,var(--c) 32%,#fff);color:var(--ink);border:0}
-.allday .chip.both{background:linear-gradient(135deg,color-mix(in srgb,var(--long) 36%,#fff),color-mix(in srgb,var(--zhen) 36%,#fff))}
+.allday .chip{font-size:10px;line-height:1.35;padding:2px 4px;border-radius:4px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;word-break:break-all;background:color-mix(in srgb,var(--c) 32%,#fff);color:var(--ink);border:0}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 
@@ -242,7 +239,7 @@ const ls={get(k,d){try{const v=localStorage.getItem(LS+k);return v==null?d:JSON.
 
 const S={ me:null, mode:"loading", tab:ls.get("tab","stamps"), book:"other", kind:"good", sel:null,
   calMode:ls.get("calMode","month"), cursor:new Date(), filter:"all", listMine:false, listPast:false,
-  stamps:[], events:[], oldEvents:[], wishes:[], lists:[], todos:[], notes:[], noteView:ls.get('noteView','grid'), clView:ls.get('clView','all'), showDone:false, todoWho:null, colors:{long:"#8fa3b3",zhen:"#d4a5a5"}, minH:3 };
+  stamps:[], events:[], oldEvents:[], wishes:[], lists:[], todos:[], notes:[], noteView:ls.get('noteView','grid'), clView:ls.get('clView','all'), showDone:false, todoWho:null, colors:{long:"#8fa3b3",zhen:"#d4a5a5",both:"#b4a7b8"}, minH:3 };
 let db=null;
 
 /* ---------- helpers ---------- */
@@ -258,7 +255,7 @@ const hm=m=>pad(Math.floor(m/60))+":"+pad(m%60);
 const today=()=>ymd(new Date());
 const other=()=>S.me==="long"?"zhen":"long";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-const col=w=>w==="long"?S.colors.long:w==="zhen"?S.colors.zhen:"#16181c";
+const col=w=>w==="long"?S.colors.long:w==="zhen"?S.colors.zhen:w==="both"?(S.colors.both||"#b4a7b8"):"#16181c";
 const whoLabel=w=>w==="both"?NAME.long+NAME.zhen:NAME[w]||"";
 const evTime=e=>e.allDay?"整天":e.start+"–"+e.end;
 const sortEv=(a,b)=>(a.date+(a.allDay?"00:00":a.start)).localeCompare(b.date+(b.allDay?"00:00":b.start));
@@ -298,7 +295,7 @@ const Store={
     render()}
 };
 function setNames(d){d=d||{};NAME.long=(d.long||"").trim()||DEFNAME.long;NAME.zhen=(d.zhen||"").trim()||DEFNAME.zhen}
-function applyColors(){const r=document.documentElement.style;r.setProperty("--long",S.colors.long);r.setProperty("--zhen",S.colors.zhen)}
+function applyColors(){const r=document.documentElement.style;r.setProperty("--long",S.colors.long);r.setProperty("--zhen",S.colors.zhen);r.setProperty("--both",S.colors.both||"#b4a7b8")}
 
 async function init(){
   render();
@@ -313,7 +310,7 @@ async function init(){
     const err=()=>{clearTimeout(timer);$("#banner").textContent="資料讀取失敗，請重新開啟這個頁面。"};
     COLS.forEach(c=>db.collection(c).onSnapshot(snap=>{
       S[c==="events"?"oldEvents":c]=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(!snap.metadata.fromCache) ok(); render()},err));
-    db.doc("config/colors").onSnapshot(s=>{ if(s.exists){const d=s.data(); S.colors={long:d.long||S.colors.long,zhen:d.zhen||S.colors.zhen}; applyColors(); render()} },()=>{});
+    db.doc("config/colors").onSnapshot(s=>{ if(s.exists){const d=s.data(); S.colors={long:d.long||S.colors.long,zhen:d.zhen||S.colors.zhen,both:d.both||S.colors.both}; applyColors(); render()} },()=>{});
     ["long","zhen"].forEach(w=>db.doc("checklists/"+w).onSnapshot(s=>{ if(clLoad(w,s.exists?s.data().items:[])) render(); else if(S.tab==="list") clMigrate() },()=>{}));
     db.doc("config/names").onSnapshot(s=>{ if(s.exists){setNames(s.data()); render()} },()=>{});
   }else{
@@ -420,7 +417,7 @@ function viewCal(){
       segs.filter(sg=>sg.lane!=null).forEach(sg=>{const e=sg.ev;
         cells+=`<button class="bar ${e.who==="both"?"both":""} ${e.allDay?"":"timed"} ${sg.contL?"cont-l":""} ${sg.contR?"cont-r":""}" style="--c:${col(e.who)};grid-column:${sg.start+1}/${sg.end+2};grid-row:${sg.lane+2}" data-act="editEv" data-id="${e.id}" title="${esc(e.title)}${e.loc?" @"+esc(e.loc):""}">${esc(e.title)}</button>`});
       over.forEach((n,i)=>{ if(n) cells+=`<button class="more" style="grid-column:${i+1};grid-row:${rows+1}" data-act="day" data-d="${days[i].k}">+${n}</button>`});
-      html+=`<div class="wk" style="grid-template-rows:26px repeat(${rows},19px)">${cells}</div>`;
+      html+=`<div class="wk" style="grid-template-rows:26px repeat(${rows},auto)">${cells}</div>`;
     }
     body=html;
   }else{
@@ -450,7 +447,7 @@ function viewCal(){
   </div>
   <div class="gap-s">${body}</div>
   <div class="row between gap-s">
-    <div class="legend"><span><i class="dot" style="background:var(--long)"></i>${esc(NAME.long)}</span><span><i class="dot" style="background:var(--zhen)"></i>${esc(NAME.zhen)}</span><span><i class="dot" style="background:linear-gradient(90deg,var(--long) 50%,var(--zhen) 50%)"></i>兩人</span></div>
+    <div class="legend"><span><i class="dot" style="background:var(--long)"></i>${esc(NAME.long)}</span><span><i class="dot" style="background:var(--zhen)"></i>${esc(NAME.zhen)}</span><span><i class="dot" style="background:var(--both)"></i>兩人</span></div>
     <button class="btn small" data-act="free">找兩人空檔</button>
   </div>`;
 }
@@ -477,7 +474,7 @@ function freeSheet(){
 function daySheet(k){
   const list=S.events.filter(e=>e.date===k&&visible(e,S.filter)).sort(sortEv);
   sheet(`<div class="row between"><p class="h2">${mdw(k)}</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
-  <div>${list.length?list.map(e=>`<button class="slotrow" style="width:100%;text-align:left" data-act="editEv" data-id="${e.id}"><i class="dot" style="background:${e.who==="both"?"linear-gradient(90deg,var(--long) 50%,var(--zhen) 50%)":col(e.who)}"></i><span class="t">${esc(e.title)}${e.loc?`<br><span class="hint">@ ${esc(e.loc)}</span>`:""}</span><span class="hint">${esc(whoLabel(e.who))}　${evTime(e)}</span></button>`).join(""):`<p class="empty">這天沒有行程。</p>`}</div>
+  <div>${list.length?list.map(e=>`<button class="slotrow" style="width:100%;text-align:left" data-act="editEv" data-id="${e.id}"><i class="dot" style="background:${e.who==="both"?col("both"):col(e.who)}"></i><span class="t">${esc(e.title)}${e.loc?`<br><span class="hint">@ ${esc(e.loc)}</span>`:""}</span><span class="hint">${esc(whoLabel(e.who))}　${evTime(e)}</span></button>`).join(""):`<p class="empty">這天沒有行程。</p>`}</div>
   <button class="btn" data-act="addEv" data-d="${k}">新增行程</button>`);
 }
 function evSheet(e){
@@ -500,7 +497,7 @@ function evSheet(e){
 }
 
 /* ---------- 分頁：列表 ---------- */
-function whoDot(w){return w==="both"?"linear-gradient(90deg,var(--long) 50%,var(--zhen) 50%)":col(w)}
+function whoDot(w){return col(w)}
 /* 列表：每人一張可縮排的勾選清單 */
 const CL={long:[],zhen:[]}, clLoaded={long:false,zhen:false}, clDirty={long:false,zhen:false}, clTimer={long:null,zhen:null}, clShowDone={long:false,zhen:false};
 let clMigrated=false, focusNext=null, drag=null;
@@ -763,12 +760,12 @@ const A={
   planWish(el){const w=S.wishes.find(x=>x.id===el.dataset.id); if(w) evSheet({who:"both",date:today(),allDay:false,start:"18:00",end:"21:00",title:w.text,wishId:w.id})},
   delWish(el){ if(armed(el)) Store.remove("wishes",el.dataset.id) },
   settings(){
-    const sw=w=>`<div class="field"><span>${esc(NAME[w])}的顏色</span><div class="swatches">${PALETTE.map(c=>`<button data-act="color" data-w="${w}" data-v="${c}" style="--c:${c}" aria-pressed="${S.colors[w]===c}" aria-label="${c}"></button>`).join("")}</div></div>`;
+    const sw=w=>`<div class="field"><span>${w==="both"?"兩人一起":esc(NAME[w])}的顏色</span><div class="swatches">${PALETTE.map(c=>`<button data-act="color" data-w="${w}" data-v="${c}" style="--c:${c}" aria-pressed="${S.colors[w]===c}" aria-label="${c}"></button>`).join("")}</div></div>`;
     sheet(`<div class="row between"><p class="h2">設定</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
     <div class="two"><label class="field"><span>${DEFNAME.long}的暱稱</span><input type="text" id="name-long" value="${esc(NAME.long)}" maxlength="8"></label>
     <label class="field"><span>${DEFNAME.zhen}的暱稱</span><input type="text" id="name-zhen" value="${esc(NAME.zhen)}" maxlength="8"></label></div>
     <button class="btn ghost" data-act="saveNames">儲存暱稱</button>
-    ${sw("long")}${sw("zhen")}
+    ${sw("long")}${sw("zhen")}${sw("both")}
     <p class="hint">暱稱和顏色兩人共用，改了對方也會看到。</p>
     <p class="hint">版本 __BUILD__</p>
     <button class="btn ghost" data-act="importOpen">匯入紀錄</button>
