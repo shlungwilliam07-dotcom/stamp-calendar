@@ -17,9 +17,9 @@
   --soft:#f6f7f8;
   --good:#b8645a;
   --bad:#6b7d96;
-  --long:#8fa3b3;
-  --zhen:#d4a5a5;
-  --both:#b4a7b8;
+  --long:#7b9bb8;
+  --zhen:#cf8a8f;
+  --both:#9b86b8;
   --display:"Noto Serif TC","Songti TC",serif;
   --body:"Noto Sans TC","PingFang TC","Heiti TC",system-ui,sans-serif;
 }
@@ -93,7 +93,7 @@ nav button[aria-current="true"]::before{content:"";position:absolute;top:-1px;le
 .wk .n{font-size:12px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-variant-numeric:tabular-nums;margin:1px auto 2px;color:var(--ink)}
 .wk .out .n{color:#c9cdd3}
 .wk .today .n{background:var(--ink);color:#fff}
-.bar{z-index:1;font-size:11px;line-height:1.35;padding:2px 5px;border-radius:5px;text-align:left;color:var(--ink);background:color-mix(in srgb,var(--c) 32%,#fff);min-width:0;margin:1px 0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;word-break:break-all;overflow-wrap:anywhere;align-self:start}
+.bar{z-index:1;font-size:11px;line-height:1.35;padding:2px 5px;border-radius:5px;text-align:left;color:var(--ink);background:color-mix(in srgb,var(--c) 48%,#fff);min-width:0;margin:1px 0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;word-break:break-all;overflow-wrap:anywhere;align-self:start}
 .bar.cont-l{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-2px;padding-left:6px}
 .bar.cont-r{border-top-right-radius:0;border-bottom-right-radius:0;margin-right:-2px}
 .bar.timed::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--c);margin:0 4px 1px 0;vertical-align:middle}
@@ -107,9 +107,9 @@ nav button[aria-current="true"]::before{content:"";position:absolute;top:-1px;le
 .hours span{position:absolute;right:4px;font-size:10px;color:var(--muted);transform:translateY(-50%);font-variant-numeric:tabular-nums}
 .col{position:relative;border-left:1px solid var(--line);background-image:linear-gradient(var(--line) 1px,transparent 1px);background-size:100% 40px;display:block;width:100%}
 .band{position:absolute;left:0;right:0;background:var(--soft);z-index:0;pointer-events:none}
-.ev{position:absolute;z-index:1;border-radius:5px;padding:2px 4px;font-size:11px;line-height:1.35;overflow:hidden;text-align:left;background:color-mix(in srgb,var(--c) 32%,#fff);color:var(--ink);word-break:break-all;overflow-wrap:anywhere}
+.ev{position:absolute;z-index:1;border-radius:5px;padding:2px 4px;font-size:11px;line-height:1.35;overflow:hidden;text-align:left;background:color-mix(in srgb,var(--c) 48%,#fff);color:var(--ink);word-break:break-all;overflow-wrap:anywhere}
 .ev .hint{display:block;font-size:9px}
-.allday .chip{font-size:10px;line-height:1.35;padding:2px 4px;border-radius:4px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;word-break:break-all;background:color-mix(in srgb,var(--c) 32%,#fff);color:var(--ink);border:0}
+.allday .chip{font-size:10px;line-height:1.35;padding:2px 4px;border-radius:4px;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;word-break:break-all;background:color-mix(in srgb,var(--c) 48%,#fff);color:var(--ink);border:0}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 
@@ -231,7 +231,7 @@ input[type=text],input[type=date],input[type=time],textarea{border:1px solid var
 (function(){
 "use strict";
 const NAME={long:"龍",zhen:"蓁"}, DEFNAME={long:"龍",zhen:"蓁"}, WD=["日","一","二","三","四","五","六"];
-const PALETTE=["#8fa3b3","#d4a5a5","#a8b5a0","#c9b28a","#b4a7b8","#b08b7e","#9fb8ad","#9a9ea6"];
+const PALETTE=["#7b9bb8","#cf8a8f","#86a883","#c9a45c","#9b86b8","#c48a62","#6faaa6","#8f8f95"];
 const WIN=[12*60,21*60], H0=8, H1=23, HPX=40;
 const LS="stampcal:";
 const ls={get(k,d){try{const v=localStorage.getItem(LS+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
@@ -239,7 +239,7 @@ const ls={get(k,d){try{const v=localStorage.getItem(LS+k);return v==null?d:JSON.
 
 const S={ me:null, mode:"loading", tab:ls.get("tab","stamps"), book:"other", kind:"good", sel:null,
   calMode:ls.get("calMode","month"), cursor:new Date(), filter:"all", listMine:false, listPast:false,
-  stamps:[], events:[], oldEvents:[], wishes:[], lists:[], todos:[], notes:[], noteView:ls.get('noteView','grid'), clView:ls.get('clView','all'), showDone:false, todoWho:null, colors:{long:"#8fa3b3",zhen:"#d4a5a5",both:"#b4a7b8"}, minH:3 };
+  stamps:[], events:[], oldEvents:[], wishes:[], lists:[], todos:[], notes:[], noteView:ls.get('noteView','grid'), clView:ls.get('clView','all'), showDone:false, todoWho:null, colors:{long:"#7b9bb8",zhen:"#cf8a8f",both:"#9b86b8"}, minH:3 };
 let db=null;
 
 /* ---------- helpers ---------- */
@@ -255,7 +255,7 @@ const hm=m=>pad(Math.floor(m/60))+":"+pad(m%60);
 const today=()=>ymd(new Date());
 const other=()=>S.me==="long"?"zhen":"long";
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-const col=w=>w==="long"?S.colors.long:w==="zhen"?S.colors.zhen:w==="both"?(S.colors.both||"#b4a7b8"):"#16181c";
+const col=w=>w==="long"?S.colors.long:w==="zhen"?S.colors.zhen:w==="both"?(S.colors.both||"#9b86b8"):"#16181c";
 const whoLabel=w=>w==="both"?NAME.long+NAME.zhen:NAME[w]||"";
 const evTime=e=>e.allDay?"整天":e.start+"–"+e.end;
 const sortEv=(a,b)=>(a.date+(a.allDay?"00:00":a.start)).localeCompare(b.date+(b.allDay?"00:00":b.start));
@@ -295,7 +295,7 @@ const Store={
     render()}
 };
 function setNames(d){d=d||{};NAME.long=(d.long||"").trim()||DEFNAME.long;NAME.zhen=(d.zhen||"").trim()||DEFNAME.zhen}
-function applyColors(){const r=document.documentElement.style;r.setProperty("--long",S.colors.long);r.setProperty("--zhen",S.colors.zhen);r.setProperty("--both",S.colors.both||"#b4a7b8")}
+function applyColors(){const r=document.documentElement.style;r.setProperty("--long",S.colors.long);r.setProperty("--zhen",S.colors.zhen);r.setProperty("--both",S.colors.both||"#9b86b8")}
 
 async function init(){
   render();
@@ -310,7 +310,7 @@ async function init(){
     const err=()=>{clearTimeout(timer);$("#banner").textContent="資料讀取失敗，請重新開啟這個頁面。"};
     COLS.forEach(c=>db.collection(c).onSnapshot(snap=>{
       S[c==="events"?"oldEvents":c]=snap.docs.map(d=>Object.assign({id:d.id},d.data())); if(!snap.metadata.fromCache) ok(); render()},err));
-    db.doc("config/colors").onSnapshot(s=>{ if(s.exists){const d=s.data(); S.colors={long:d.long||S.colors.long,zhen:d.zhen||S.colors.zhen,both:d.both||S.colors.both}; applyColors(); render()} },()=>{});
+    db.doc("config/colors").onSnapshot(s=>{ if(s.exists){const d=s.data(); const OLD={"#3b6fd4":"#7b9bb8","#e0719a":"#cf8a8f","#8fa3b3":"#7b9bb8","#d4a5a5":"#cf8a8f","#b4a7b8":"#9b86b8","#a8b5a0":"#86a883","#c9b28a":"#c9a45c","#b08b7e":"#c48a62","#9fb8ad":"#6faaa6","#9a9ea6":"#8f8f95"}; const up=c=>OLD[c]||c; S.colors={long:up(d.long)||S.colors.long,zhen:up(d.zhen)||S.colors.zhen,both:up(d.both)||S.colors.both}; applyColors(); render()} },()=>{});
     ["long","zhen"].forEach(w=>db.doc("checklists/"+w).onSnapshot(s=>{ if(clLoad(w,s.exists?s.data().items:[])) render(); else if(S.tab==="list") clMigrate() },()=>{}));
     db.doc("config/names").onSnapshot(s=>{ if(s.exists){setNames(s.data()); render()} },()=>{});
   }else{
