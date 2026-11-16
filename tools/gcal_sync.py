@@ -40,6 +40,9 @@ def calendar_rows(ics_bytes, start_day, days):
         if str(ev.get("STATUS", "")).upper() == "CANCELLED":
             continue
         title = " ".join(str(ev.get("SUMMARY", "")).split())[:120] or "（無標題）"
+        loc = " ".join(str(ev.get("LOCATION", "") or "").split()).replace("@", "")
+        if loc:
+            title += " @" + loc.split(",")[0].strip()[:40]
         s, e = ev.get("DTSTART").dt, (ev.get("DTEND") or ev.get("DTSTART")).dt
         if isinstance(s, dt.datetime):
             if s.tzinfo is None:

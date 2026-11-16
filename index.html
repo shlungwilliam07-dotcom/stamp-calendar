@@ -374,7 +374,7 @@ function viewStamps(){
 }
 
 /* ---------- 分頁：行事曆 ---------- */
-function chip(e){return `<div class="chip ${e.who==="both"?"both":""}" style="--c:${col(e.who)}">${esc(e.title)}</div>`}
+function chip(e){return `<div class="chip ${e.who==="both"?"both":""}" style="--c:${col(e.who)}" title="${esc(e.title)}${e.loc?" @"+esc(e.loc):""}">${esc(e.title)}</div>`}
 function viewCal(){
   const c=S.cursor, y=c.getFullYear(), m=c.getMonth(), td=today();
   const evs=S.events.filter(e=>visible(e,S.filter)).sort(sortEv);
@@ -400,7 +400,7 @@ function viewCal(){
       const blocks=list.filter(x=>!x.allDay).map(x=>{
         const a=Math.max(H0*60,mins(x.start)), b=Math.min(H1*60,Math.max(mins(x.end),a+30));
         let l=1,w=98; if(S.filter==="all"&&x.who!=="both"){w=48;l=x.who==="long"?1:51}
-        return `<button class="ev ${x.who==="both"?"both":""}" data-act="editEv" data-id="${x.id}" style="--c:${col(x.who)};top:${(a-H0*60)/60*HPX}px;height:${(b-a)/60*HPX-1}px;left:${l}%;width:${w}%">${esc(x.title)}</button>`}).join("");
+        return `<button class="ev ${x.who==="both"?"both":""}" data-act="editEv" data-id="${x.id}" style="--c:${col(x.who)};top:${(a-H0*60)/60*HPX}px;height:${(b-a)/60*HPX-1}px;left:${l}%;width:${w}%">${esc(x.title)}${x.loc?`<span class="hint" style="font-size:9px"> @${esc(x.loc)}</span>`:""}</button>`}).join("");
       cols+=`<div class="col" data-act="addEv" data-d="${k}" style="height:${(H1-H0)*HPX}px"><div class="band" style="top:${(WIN[0]/60-H0)*HPX}px;height:${(WIN[1]-WIN[0])/60*HPX}px"></div>${blocks}</div>`});
     body=`<div class="week">${hd}${ad}${hours}${cols}</div><p class="hint gap-s">灰底是 12:00–21:00 約會時段。點空白處新增行程。</p>`;
   }
@@ -442,13 +442,14 @@ function freeSheet(){
 function daySheet(k){
   const list=S.events.filter(e=>e.date===k&&visible(e,S.filter)).sort(sortEv);
   sheet(`<div class="row between"><p class="h2">${mdw(k)}</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
-  <div>${list.length?list.map(e=>`<button class="slotrow" style="width:100%;text-align:left" data-act="editEv" data-id="${e.id}"><i class="dot" style="background:${e.who==="both"?"linear-gradient(90deg,var(--long) 50%,var(--zhen) 50%)":col(e.who)}"></i><span class="t">${esc(e.title)}</span><span class="hint">${esc(whoLabel(e.who))}　${evTime(e)}</span></button>`).join(""):`<p class="empty">這天沒有行程。</p>`}</div>
+  <div>${list.length?list.map(e=>`<button class="slotrow" style="width:100%;text-align:left" data-act="editEv" data-id="${e.id}"><i class="dot" style="background:${e.who==="both"?"linear-gradient(90deg,var(--long) 50%,var(--zhen) 50%)":col(e.who)}"></i><span class="t">${esc(e.title)}${e.loc?`<br><span class="hint">@ ${esc(e.loc)}</span>`:""}</span><span class="hint">${esc(whoLabel(e.who))}　${evTime(e)}</span></button>`).join(""):`<p class="empty">這天沒有行程。</p>`}</div>
   <button class="btn" data-act="addEv" data-d="${k}">新增行程</button>`);
 }
 function evSheet(e){
   const isNew=!e.id;
   sheet(`<div class="row between"><p class="h2">${isNew?"新增行程":"編輯行程"}</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
   <label class="field"><span>行程內容</span><input type="text" id="ev-title" value="${esc(e.title||"")}" placeholder="例如：晚餐" maxlength="80"></label>
+  <label class="field"><span>地點（選填）</span><input type="text" id="ev-loc" value="${esc(e.loc||"")}" placeholder="例如：Salt & Stone 101" maxlength="60"></label>
   <div class="field"><span>誰的行程</span><div class="seg" id="ev-who" data-v="${e.who}">${["long","zhen","both"].map(w=>`<button data-act="evWho" data-v="${w}" aria-pressed="${e.who===w}">${w==="both"?"兩人一起":esc(NAME[w])}</button>`).join("")}</div></div>
   <div class="two"><label class="field"><span>日期</span><input type="date" id="ev-date" value="${e.date}"></label>
   <label class="field"><span>結束日期（跨多天才填）</span><input type="date" id="ev-end-date" value="${e.endDate||""}"></label></div>
@@ -486,7 +487,9 @@ function parseItem(text){
   const k=t.match(RE_TIME);
   if(k){const sh=+(k[1]||k[3]), sm=+(k[2]||k[4]), has=k[5]!=null||k[7]!=null, eh=+(k[5]||k[7]), em=+(k[6]||k[8]);
     if(sh<24&&sm<60&&(!has||(eh<=24&&em<60))){let st=sh*60+sm, en=has?eh*60+em:st+60; if(en<=st) en=st+60; en=Math.min(en,23*60+59); time={start:hm(st),end:hm(en)}; t=t.slice(k[0].length)}}
-  return {date,time,title:t.trim()};
+  t=t.trim(); let loc=""; const at=t.search(/(?:\s+@|＠)\s*[^@＠]+$/);
+  if(at>0){loc=t.slice(at).replace(/^\s*[@＠]\s*/,"").trim(); t=t.slice(0,at).trim()}
+  return {date,time,title:t,loc};
 }
 const NOT_NAME=["恐龍","烏龍","龍蝦","龍眼","九龍","龍山","龍舟","龍膽","龍貓","龍潭","龍鳳","沙龍","尼龍","保麗龍","水龍頭","龍捲風","火龍果","龍井","龍門","青龍","一條龍","舞龍","龍年","龍珠","接龍","馬卡龍","古龍","飛龍","小龍","龍洞","龍虎","龍膽","龍柏","龍岡","龍華","龍泉","龍崎","龍騰","翼龍","暴龍","雷龍","迅猛龍","龍族","神龍","龍王","龍宮","龍套","變色龍","龍鬚","龍葵","龍蒿","烏龍茶","龍角散","葳蕤","蓁蓁"];
 function mentions(title,name){
@@ -498,7 +501,7 @@ function mentions(title,name){
 function deriveEvents(){
   const out=[];
   ["long","zhen"].forEach(w=>{const o=w==="long"?"zhen":"long"; let par=null;
-    const mk=(it,p,ds,multi,child)=>out.push({id:multi?it.id+"@"+ds:it.id,itemId:it.id,list:w,who:(it.both||mentions(p.title,NAME[o]))?"both":w,title:p.title,date:ds,
+    const mk=(it,p,ds,multi,child)=>out.push({id:multi?it.id+"@"+ds:it.id,itemId:it.id,list:w,who:(it.both||mentions(p.title,NAME[o]))?"both":w,title:p.title,loc:p.loc||"",date:ds,
       allDay:!p.time,start:p.time?p.time.start:"",end:p.time?p.time.end:"",multi,child:!!child,done:it.done});
     CL[w].forEach(it=>{const p=parseItem(it.text);
       if(!it.indent){par=null; if(p.date){par={dates:p.date,hasTitle:!!p.title}; if(p.title) p.date.forEach(ds=>mk(it,p,ds,p.date.length>1,false))}}
@@ -509,7 +512,7 @@ function deriveEvents(){
 }
 const hhmm=t=>t.replace(":","");
 function fmtItem(d,child){const tm=d.allDay?"":hhmm(d.start)+" - "+hhmm(d.end)+" ";
-  const dt=child?"":d.endDate?md(d.date)+" - "+md(d.endDate)+" ":mdw(d.date).replace("（"," (").replace("）",") "); return dt+tm+d.title}
+  const dt=child?"":d.endDate?md(d.date)+" - "+md(d.endDate)+" ":mdw(d.date).replace("（"," (").replace("）",") "); return dt+tm+d.title+(d.loc?" @"+d.loc:"")}
 function clInsertEvent(w,d,both,id){
   const arr=CL[w], it={id:id||uid(),text:"",done:false,indent:0,both:!!both};
   const tops=arr.map((x,j)=>({x,j,p:parseItem(x.text)})).filter(o=>!o.x.indent&&!o.x.done&&o.p.date);
@@ -576,7 +579,7 @@ function viewList(){
     <p class="h2">列表</p>
     <div class="seg"><button data-act="clView" data-v="all" aria-pressed="${S.clView==="all"}">兩人</button><button data-act="clView" data-v="long" aria-pressed="${S.clView==="long"}">${esc(NAME.long)}</button><button data-act="clView" data-v="zhen" aria-pressed="${S.clView==="zhen"}">${esc(NAME.zhen)}</button></div>
   </div>
-  <p class="hint">開頭寫日期就會進行事曆，例如「11/14 1800 - 2100 晚餐」。有圓點的項目已在行事曆。</p>
+  <p class="hint">開頭寫日期就會進行事曆，例如「11/14 1800 - 2100 晚餐 @臺大」，@ 後面是地點。有圓點的項目已在行事曆。</p>
   ${ws.map(sec).join("")}`;
 }
 /* Keep 同步：Keep 來的項目標記 k，之後以 Keep 為準；在 app 裡自己加的項目保留在原本的相對位置 */
@@ -687,7 +690,8 @@ const A={
     if(!allDay&&(!start||!end||mins(end)<=mins(start))){toast("結束時間要晚於開始時間");return}
     let endDate=$("#ev-end-date").value; if(endDate&&endDate<date){toast("結束日期要晚於開始日期");return}
     if(endDate===date) endDate=""; if(endDate&&(parse(endDate)-parse(date))/864e5>30){toast("跨多天最多 31 天");return}
-    const data={title,date,endDate,allDay,who:$("#ev-who").dataset.v,start:allDay?"":start,end:allDay?"":end};
+    const loc=$("#ev-loc").value.replace(/[@＠]/g,"").trim();
+    const data={title,loc,date,endDate,allDay,who:$("#ev-who").dataset.v,start:allDay?"":start,end:allDay?"":end};
     const id=$("#ev-id").value, wish=$("#ev-wish").value, both=data.who==="both";
     if(id){const f=clFind(id), olds=S.events.filter(e=>e.itemId===id).sort(sortEv), old=olds[0]; if(!f||!old){toast("找不到這個行程");closeSheet();render();return}
       const w=both?f.w:data.who, same=old.date===date&&olds[olds.length-1].date===(endDate||date);
@@ -770,7 +774,7 @@ document.addEventListener("keydown",ev=>{
     return;
   }
   if(ev.key==="Enter"&&!ev.isComposing){const id=ev.target.id;
-    if(id==="wish-text") A.addWish(); else if(id==="stamp-reason") A.saveStamp(); else if(id==="ev-title") A.saveEv()}
+    if(id==="wish-text") A.addWish(); else if(id==="stamp-reason") A.saveStamp(); else if(id==="ev-title"||id==="ev-loc") A.saveEv()}
 });
 document.addEventListener("pointerdown",ev=>{
   const g=ev.target.closest("[data-grip]"); if(!g) return; ev.preventDefault();
