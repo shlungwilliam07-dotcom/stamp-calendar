@@ -193,7 +193,9 @@ input[type=text],input[type=date],input[type=time],textarea{border:1px solid var
 .swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
 .slotrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .slotrow .t{flex:1;font-variant-numeric:tabular-nums}
-#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:86%;text-align:center}
+#toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:86%;text-align:center;display:flex;gap:14px;align-items:center}
+#toast.show{pointer-events:auto}
+#toast button{color:#ffd166;font-weight:500;letter-spacing:.08em;padding:2px 0}
 #toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
@@ -253,7 +255,15 @@ const whoLabel=w=>w==="both"?NAME.long+NAME.zhen:NAME[w]||"";
 const evTime=e=>e.allDay?"整天":e.start+"–"+e.end;
 const sortEv=(a,b)=>(a.date+(a.allDay?"00:00":a.start)).localeCompare(b.date+(b.allDay?"00:00":b.start));
 const visible=(e,f)=>f==="all"||e.who===f||e.who==="both";
-function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),2600)}
+function toast(t,undo){const el=$("#toast");el.textContent="";el.append(t);
+  if(undo){const b=document.createElement("button");b.textContent="復原";b.onclick=()=>{el.classList.remove("show");undo()};el.append(b)}
+  el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),undo?7000:2600)}
+/* 刪除後可復原：記住被刪項目與原本位置 */
+function clRemove(w,ids,label){const removed=[]; CL[w].forEach((it,n)=>{ if(ids.includes(it.id)) removed.push({it,n}) }); if(!removed.length) return;
+  CL[w]=CL[w].filter(x=>!ids.includes(x.id)); clNorm(w); clTouch(w); render();
+  toast(label||("已刪除「"+(removed[0].it.text||"空白項目").slice(0,12)+(removed[0].it.text.length>12?"…":"")+"」"),()=>{
+    if(removed.some(x=>CL[w].some(y=>y.id===x.it.id))) return;
+    removed.forEach(x=>CL[w].splice(Math.min(x.n,CL[w].length),0,x.it)); clNorm(w); clTouch(w); render(); toast("已復原")})}
 
 /* ---------- store: 雲端 db 或本機預覽 ---------- */
 const COLS=["stamps","events","wishes","lists","todos","notes"];
@@ -701,8 +711,7 @@ const A={
     S.cursor=parse(date); closeSheet(); render(); toast(id?"已更新":"已加入行事曆")},
   delEv(el){ if(!armed(el,"再按一次確定刪除")) return; const e=S.events.find(x=>x.itemId===el.dataset.id); if(!e) return;
     S.wishes.filter(w=>w.eventId===e.itemId).forEach(w=>Store.update("wishes",w.id,{eventId:""}));
-    const f=clFind(e.itemId); if(f){const ids=(e.child?[f.it]:clGroup(f.w,f.it.id)).map(i=>i.id); CL[f.w]=CL[f.w].filter(x=>!ids.includes(x.id)); clNorm(f.w); clTouch(f.w)}
-    closeSheet(); render()},
+    const f=clFind(e.itemId); closeSheet(); if(f){const ids=(e.child?[f.it]:clGroup(f.w,f.it.id)).map(i=>i.id); clRemove(f.w,ids,"已刪除行程「"+e.title.slice(0,10)+"」")} else render()},
   free(){freeSheet()},
   minH(el){S.minH=+el.dataset.v;freeSheet()},
   book2(el){evSheet({who:"both",date:el.dataset.d,allDay:false,start:el.dataset.s,end:el.dataset.e,title:"約會"})},
@@ -720,8 +729,8 @@ const A={
   clToggle(el){const w=el.dataset.w, g=clGroup(w,el.dataset.id); if(!g.length) return; const v=!g[0].done; g.forEach(i=>i.done=v); clNorm(w); clTouch(w); render()},
   clIndent(el){const w=el.dataset.w, i=CL[w].find(x=>x.id===el.dataset.id); if(!i) return; i.indent=i.indent?0:1; clNorm(w);
     if(i.indent===0&&el.getAttribute("aria-label")==="縮排成子項目") toast("第一個項目不能縮排"); clTouch(w); render()},
-  clClearDone(el){ if(!armed(el,"再按一次，刪除所有已勾選項目")) return; const w=el.dataset.w; CL[w]=CL[w].filter(x=>!x.done); clNorm(w); clTouch(w); render(); toast("已清除") },
-  clDel(el){const w=el.dataset.w; CL[w]=CL[w].filter(x=>x.id!==el.dataset.id); clNorm(w); clTouch(w); render()},
+  clClearDone(el){const w=el.dataset.w, ids=CL[w].filter(x=>x.done).map(x=>x.id); clRemove(w,ids,"已清除 "+ids.length+" 個已勾選項目")},
+  clDel(el){clRemove(el.dataset.w,[el.dataset.id])},
   listMine(el){S.listMine=el.dataset.v==="1";render()},
   listPast(){S.listPast=!S.listPast;render()},
   addWish(){const i=$("#wish-text"), t=i.value.trim(); if(!t){toast("先寫下願望");return} i.value=""; i.blur(); Store.add("wishes",{text:t,by:S.me,ts:Date.now(),done:false,eventId:""}); render()},
