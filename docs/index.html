@@ -254,8 +254,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="config.js?v=1794800828"></script>
-<script src="app.js?v=1794800828"></script>
+<script src="config.js?v=1794801102"></script>
+<script src="app.js?v=1794801102"></script>
 
 <script>
 (function(){
@@ -335,7 +335,7 @@ async function init(){
     S.mode="cloud";
     let owner=null; try{ owner=user?await user.isOwner():null }catch(e){}
     S.me = owner===true?"long":owner===false?"zhen":ls.get("me",null);
-    const timer=setTimeout(()=>{$("#banner").textContent="資料暫時連不上，稍後會自動更新。"},10000);
+    const timer=setTimeout(()=>{},10000);
     const ok=()=>{clearTimeout(timer);$("#banner").textContent=""};
     const err=()=>{clearTimeout(timer);$("#banner").textContent="資料讀取失敗，請重新開啟這個頁面。"};
     COLS.forEach(c=>db.collection(c).onSnapshot(snap=>{
@@ -799,7 +799,7 @@ const A={
     <button class="btn ghost" data-act="saveNames">儲存暱稱</button>
     ${sw("long")}${sw("zhen")}${sw("both")}
     <p class="hint">暱稱和顏色兩人共用，改了對方也會看到。</p>
-    <p class="hint">版本 1116-0347</p>
+    <p class="hint">版本 1116-0351</p>
     <button class="btn ghost" data-act="importOpen">匯入紀錄</button>
     ${window.appSignOut?`<button class="btn ghost" data-act="signOut">登出</button>`:""}
     ${S.mode==="local"?`<div class="field"><span>預覽身分</span><div class="seg"><button data-act="role" data-v="long" aria-pressed="${S.me==="long"}">${esc(NAME.long)}</button><button data-act="role" data-v="zhen" aria-pressed="${S.me==="zhen"}">${esc(NAME.zhen)}</button></div></div>`:""}`)},

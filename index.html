@@ -308,7 +308,7 @@ async function init(){
     S.mode="cloud";
     let owner=null; try{ owner=user?await user.isOwner():null }catch(e){}
     S.me = owner===true?"long":owner===false?"zhen":ls.get("me",null);
-    const timer=setTimeout(()=>{$("#banner").textContent="資料暫時連不上，稍後會自動更新。"},10000);
+    const timer=setTimeout(()=>{},10000);
     const ok=()=>{clearTimeout(timer);$("#banner").textContent=""};
     const err=()=>{clearTimeout(timer);$("#banner").textContent="資料讀取失敗，請重新開啟這個頁面。"};
     COLS.forEach(c=>db.collection(c).onSnapshot(snap=>{
