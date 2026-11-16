@@ -449,7 +449,7 @@ function evSheet(e){
   const isNew=!e.id;
   sheet(`<div class="row between"><p class="h2">${isNew?"新增行程":"編輯行程"}</p><button class="icon" data-act="close" aria-label="關閉">×</button></div>
   <label class="field"><span>行程內容</span><input type="text" id="ev-title" value="${esc(e.title||"")}" placeholder="例如：晚餐" maxlength="80"></label>
-  <label class="field"><span>地點（選填）</span><input type="text" id="ev-loc" value="${esc(e.loc||"")}" placeholder="例如：Salt & Stone 101" maxlength="60"></label>
+  <label class="field"><span>地點（選填）</span><input type="text" id="ev-loc" value="${esc(e.loc||"")}" placeholder="例如：公館" maxlength="60"></label>
   <div class="field"><span>誰的行程</span><div class="seg" id="ev-who" data-v="${e.who}">${["long","zhen","both"].map(w=>`<button data-act="evWho" data-v="${w}" aria-pressed="${e.who===w}">${w==="both"?"兩人一起":esc(NAME[w])}</button>`).join("")}</div></div>
   <div class="two"><label class="field"><span>日期</span><input type="date" id="ev-date" value="${e.date}"></label>
   <label class="field"><span>結束日期（跨多天才填）</span><input type="date" id="ev-end-date" value="${e.endDate||""}"></label></div>
