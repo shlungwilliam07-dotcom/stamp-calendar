@@ -184,8 +184,8 @@ input[type=text],input[type=date],input[type=time],textarea{border:1px solid var
 .wish{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}
 .wish .t{flex:1;min-width:0;overflow-wrap:anywhere}
 .wish.done .wtext{color:var(--muted);text-decoration:line-through}
-.wtext{display:block;width:100%;padding:0;line-height:1.5;min-height:0;overflow:hidden;font-size:15px;background:transparent;border-radius:4px}
-.wtext:focus{outline:none;background:var(--soft);box-shadow:0 0 0 4px var(--soft)}
+textarea.wtext{display:block;width:100%;padding:0;margin:0 0 4px;line-height:1.5;min-height:0;height:auto;overflow:hidden;font-size:15px;background:transparent;border:0;border-radius:4px;resize:none}
+textarea.wtext:focus{outline:none;background:var(--soft);box-shadow:0 0 0 4px var(--soft)}
 .check{width:22px;height:22px;border:1.5px solid #c5c9cf;border-radius:50%;flex:none;margin-top:1px;display:grid;place-items:center;font-size:12px;color:#fff}
 .done .check{background:var(--ink);border-color:var(--ink)}
 .tag{display:inline-block;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 9px;margin-top:4px}
@@ -660,7 +660,7 @@ function viewWishes(){
       <button class="check" data-act="toggleWish" data-id="${w.id}" aria-label="${w.done?"標記為未完成":"標記為完成"}">${w.done?"✓":""}</button>
       <div class="t"><textarea class="bare wtext" rows="1" id="wt-${w.id}" data-wish="${w.id}" maxlength="100" enterkeyhint="done" aria-label="願望內容，可直接修改">${esc(wishDraft[w.id]!=null?wishDraft[w.id]:w.text)}</textarea>
         ${ev?`<button class="tag" data-act="editEv" data-id="${ev.id}">已安排 ${mdw(ev.date)}</button>`:w.done?"":`<button class="tag" data-act="planWish" data-id="${w.id}">排進行事曆</button>`}
-        <span class="hint" style="margin-left:6px">${esc(NAME[w.by]||"")}許的願</span></div>
+        <span class="hint" style="margin-left:${ev||!w.done?6:0}px">${esc(NAME[w.by]||"")}許的願</span></div>
       <button class="icon" data-act="delWish" data-id="${w.id}" aria-label="刪除願望">×</button></div>`}).join(""):`<p class="empty">還沒有願望，寫下第一個吧。</p>`}</div>`;
 }
 
