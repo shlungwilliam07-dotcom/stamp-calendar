@@ -183,7 +183,9 @@ textarea.bare{border:0;padding:6px 0;border-radius:0;background:transparent;resi
 input[type=text],input[type=date],input[type=time],textarea{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;width:100%}
 .wish{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}
 .wish .t{flex:1;min-width:0;overflow-wrap:anywhere}
-.wish.done .t>span{color:var(--muted);text-decoration:line-through}
+.wish.done .wtext{color:var(--muted);text-decoration:line-through}
+.wtext{display:block;width:100%;padding:0;line-height:1.5;min-height:0;overflow:hidden;font-size:15px;background:transparent;border-radius:4px}
+.wtext:focus{outline:none;background:var(--soft);box-shadow:0 0 0 4px var(--soft)}
 .check{width:22px;height:22px;border:1.5px solid #c5c9cf;border-radius:50%;flex:none;margin-top:1px;display:grid;place-items:center;font-size:12px;color:#fff}
 .done .check{background:var(--ink);border-color:var(--ink)}
 .tag{display:inline-block;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 9px;margin-top:4px}
@@ -642,16 +644,21 @@ function clGroup(w,id){const arr=CL[w], k=arr.findIndex(i=>i.id===id), g=[]; if(
 function autosize(t){t.style.height="auto";t.style.height=t.scrollHeight+"px"}
 
 /* ---------- 分頁：許願池 ---------- */
+const wishDraft={};
+function wishCommit(t){const id=t.dataset.wish, w=S.wishes.find(x=>x.id===id); if(wishDraft[id]==null) return;
+  const v=wishDraft[id].replace(/\n/g," ").trim(); delete wishDraft[id];
+  if(!w) return; if(!v){t.value=w.text; toast("願望不能是空白，要刪除請按 ×"); return}
+  if(v!==w.text){Store.update("wishes",id,{text:v}); toast("已修改")}}
 function viewWishes(){
   const ws=S.wishes.slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0)||b.ts-a.ts);
   return `
   <p class="h2">許願池</p>
-  <p class="hint">兩個人一起想做的事。排好時間就會出現在行事曆。</p>
+  <p class="hint">兩個人一起想做的事。點文字可以直接修改，排好時間就會出現在行事曆。</p>
   <div class="add gap-s"><input type="text" id="wish-text" placeholder="例如：去日本嚕嚕米商店" maxlength="100"><button class="btn small" data-act="addWish" style="border-radius:10px;padding:0 18px">許願</button></div>
   <div class="gap-s">${ws.length?ws.map(w=>{const ev=w.eventId&&S.events.find(e=>e.itemId===w.eventId);
     return `<div class="wish ${w.done?"done":""}">
       <button class="check" data-act="toggleWish" data-id="${w.id}" aria-label="${w.done?"標記為未完成":"標記為完成"}">${w.done?"✓":""}</button>
-      <div class="t"><span>${esc(w.text)}</span><br>
+      <div class="t"><textarea class="bare wtext" rows="1" id="wt-${w.id}" data-wish="${w.id}" maxlength="100" enterkeyhint="done" aria-label="願望內容，可直接修改">${esc(wishDraft[w.id]!=null?wishDraft[w.id]:w.text)}</textarea>
         ${ev?`<button class="tag" data-act="editEv" data-id="${ev.id}">已安排 ${mdw(ev.date)}</button>`:w.done?"":`<button class="tag" data-act="planWish" data-id="${w.id}">排進行事曆</button>`}
         <span class="hint" style="margin-left:6px">${esc(NAME[w.by]||"")}許的願</span></div>
       <button class="icon" data-act="delWish" data-id="${w.id}" aria-label="刪除願望">×</button></div>`}).join(""):`<p class="empty">還沒有願望，寫下第一個吧。</p>`}</div>`;
@@ -668,7 +675,7 @@ function render(){
   if(S.mode==="loading"||!S.me){v.innerHTML=`<p class="empty">${S.mode==="loading"?"讀取中…":"請先選擇你是誰。"}</p>`;return}
   v.innerHTML=S.tab==="stamps"?viewStamps():S.tab==="cal"?viewCal():S.tab==="list"?viewList():viewWishes();
   v.scrollTop=top;
-  v.querySelectorAll("textarea[data-cl]").forEach(autosize);
+  v.querySelectorAll("textarea[data-cl],textarea[data-wish]").forEach(autosize);
   const fo=focusNext||(fid?{id:fid,pos:sel?sel[0]:0,end:sel?sel[1]:0}:null); focusNext=null;
   if(fo){const i=document.getElementById(fo.id); if(i){ if(keep!=null) i.value=keep; i.focus(); try{i.setSelectionRange(fo.pos,fo.end==null?fo.pos:fo.end)}catch(e){} }}
 }
@@ -791,6 +798,11 @@ document.addEventListener("focusout",ev=>{
   const t=ev.target, w=t.dataset&&t.dataset.cl; if(!w) return;
   setTimeout(()=>{ if(typing()||drag) return; const before=CL[w].map(i=>i.id).join(); clSort(w); if(CL[w].map(i=>i.id).join()!==before){clTouch(w);render()} },80);
 });
+document.addEventListener("input",ev=>{ const t=ev.target; if(t.dataset&&t.dataset.wish){wishDraft[t.dataset.wish]=t.value; autosize(t)} });
+document.addEventListener("focusout",ev=>{ const t=ev.target; if(t.dataset&&t.dataset.wish) wishCommit(t) });
+document.addEventListener("keydown",ev=>{ const t=ev.target; if(!(t.dataset&&t.dataset.wish)||ev.isComposing||ev.keyCode===229) return;
+  if(ev.key==="Enter"){ev.preventDefault(); t.blur()}
+  else if(ev.key==="Escape"){const w=S.wishes.find(x=>x.id===t.dataset.wish); delete wishDraft[t.dataset.wish]; if(w) t.value=w.text; t.blur()} });
 document.addEventListener("input",ev=>{
   const t=ev.target, w=t.dataset&&t.dataset.cl; if(!w) return;
   const i=CL[w].find(x=>x.id===t.dataset.id); if(i){i.text=t.value.replace(/\n/g," ");autosize(t);clTouch(w)}
