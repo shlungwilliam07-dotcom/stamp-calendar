@@ -203,6 +203,7 @@ textarea.wtext:focus{outline:none;background:var(--soft);box-shadow:0 0 0 4px va
 .swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
 .slotrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .slotrow .t{flex:1;font-variant-numeric:tabular-nums}
+.calbody{touch-action:pan-y;will-change:transform}
 #toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:8px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:86%;text-align:center;display:flex;gap:14px;align-items:center}
 #toast.show{pointer-events:auto}
 #toast button{color:#e7c9a0;font-weight:500;letter-spacing:.08em;padding:2px 0}
@@ -452,7 +453,7 @@ function viewCal(){
     <div class="seg"><button data-act="filter" data-v="all" aria-pressed="${S.filter==="all"}">合併</button><button data-act="filter" data-v="long" aria-pressed="${S.filter==="long"}">${esc(NAME.long)}</button><button data-act="filter" data-v="zhen" aria-pressed="${S.filter==="zhen"}">${esc(NAME.zhen)}</button></div>
     <div class="seg"><button data-act="calMode" data-v="month" aria-pressed="${S.calMode==="month"}">月</button><button data-act="calMode" data-v="week" aria-pressed="${S.calMode==="week"}">週</button></div>
   </div>
-  <div class="gap-s">${body}</div>
+  <div class="gap-s calbody" id="calbody">${body}</div>
   <div class="row between gap-s">
     <div class="legend"><span><i class="dot" style="background:var(--long)"></i>${esc(NAME.long)}</span><span><i class="dot" style="background:var(--zhen)"></i>${esc(NAME.zhen)}</span><span><i class="dot" style="background:var(--both)"></i>兩人</span></div>
     <button class="btn small" data-act="free">找兩人空檔</button>
@@ -664,6 +665,25 @@ function viewWishes(){
       <button class="icon" data-act="delWish" data-id="${w.id}" aria-label="刪除願望">×</button></div>`}).join(""):`<p class="empty">還沒有願望，寫下第一個吧。</p>`}</div>`;
 }
 
+/* 行事曆左右滑動切換月份／週 */
+function calGo(v,anim){const c=S.cursor;
+  S.cursor=v===0?new Date():S.calMode==="month"?new Date(c.getFullYear(),c.getMonth()+v,1):new Date(c.getFullYear(),c.getMonth(),c.getDate()+7*v);
+  render(); const b=document.getElementById("calbody");
+  if(b&&anim&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.style.transition="none";b.style.transform="translateX("+(v>0?40:-40)+"px)";b.style.opacity="0";
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.transition="transform .22s ease, opacity .22s ease";b.style.transform="";b.style.opacity=""}))}}
+let sw=null;
+document.addEventListener("touchstart",ev=>{const b=ev.target.closest&&ev.target.closest("#calbody"); if(!b||ev.touches.length!==1){sw=null;return}
+  const t=ev.touches[0]; sw={x:t.clientX,y:t.clientY,el:b,dir:0}},{passive:true});
+document.addEventListener("touchmove",ev=>{ if(!sw) return; const t=ev.touches[0], dx=t.clientX-sw.x, dy=t.clientY-sw.y;
+  if(!sw.dir){ if(Math.abs(dx)<10&&Math.abs(dy)<10) return; sw.dir=Math.abs(dx)>Math.abs(dy)*1.2?1:-1 }
+  if(sw.dir===1){ev.preventDefault(); sw.el.style.transition="none"; sw.el.style.transform="translateX("+dx*0.6+"px)"; sw.el.style.opacity=String(1-Math.min(Math.abs(dx)/600,.4))}},{passive:false});
+document.addEventListener("touchend",ev=>{ if(!sw) return; const s0=sw; sw=null; if(s0.dir!==1) return;
+  const dx=ev.changedTouches[0].clientX-s0.x;
+  if(Math.abs(dx)>50){calGo(dx<0?1:-1,true)} else {s0.el.style.transition="transform .2s ease, opacity .2s ease";s0.el.style.transform="";s0.el.style.opacity=""}
+  calSwiped=Date.now()});
+let calSwiped=0;
+document.addEventListener("click",ev=>{ if(Date.now()-calSwiped<350&&ev.target.closest&&ev.target.closest("#calbody")){ev.stopPropagation();ev.preventDefault()} },true);
+
 /* ---------- render ---------- */
 const TABS=[["stamps","印章"],["cal","行事曆"],["list","列表"],["wishes","許願池"]];
 function render(){
@@ -718,8 +738,7 @@ const A={
     if(S.book!=="other") return;
     const id=Store.add("stamps",{to:other(),by:S.me,kind:S.kind,reason:r,ts:Date.now()}); S.sel=id; closeSheet(); render()},
   delStamp(el){const s=S.stamps.find(x=>x.id===el.dataset.id); if(!s||s.to===S.me) return; if(armed(el)) Store.remove("stamps",s.id)},
-  nav(el){const v=+el.dataset.v, c=S.cursor;
-    S.cursor=v===0?new Date():S.calMode==="month"?new Date(c.getFullYear(),c.getMonth()+v,1):new Date(c.getFullYear(),c.getMonth(),c.getDate()+7*v);render()},
+  nav(el){calGo(+el.dataset.v)},
   filter(el){S.filter=el.dataset.v;render()},
   calMode(el){S.calMode=el.dataset.v;ls.set("calMode",S.calMode);render()},
   day(el){daySheet(el.dataset.d)},
